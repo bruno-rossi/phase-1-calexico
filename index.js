@@ -18,7 +18,21 @@
 fetch("http://localhost:3000/menu")
 .then(res => res.json())
 .then(menu =>{
-    
+
+    let selectedItem;
+
+    function displayDetails(item){
+        // Update selected item to be the item that was clicked on.
+        selectedItem = item;
+
+        dishImage.src = item.image;
+        dishName.textContent = item.name;
+        dishDescription.textContent = item.description;
+        dishPrice.textContent = `$${item.price}`;
+        itemCartSpan.textContent = item.number_in_bag;
+
+    }
+
     menu.forEach(item => { 
         const divMenuItems = document.body.querySelector("#menu-items");
         const spanTag = document.createElement("span");
@@ -39,15 +53,9 @@ fetch("http://localhost:3000/menu")
     const dishName = document.querySelector("#dish-name");
     const dishDescription = document.querySelector("#dish-description");
     const dishPrice = document.querySelector("#dish-price");
+    const itemCartSpan = document.querySelector("#number-in-cart");
 
     displayDetails(menu[0]);
-
-    function displayDetails(item){
-        dishImage.src = item.image;
-        dishName.textContent = item.name;
-        dishDescription.textContent = item.description;
-        dishPrice.textContent = `$${item.price}`;
-    }
 
     // Form functionality:
     const form = document.querySelector("#cart-form");
@@ -55,27 +63,57 @@ fetch("http://localhost:3000/menu")
     form.addEventListener("submit", event => {
         event.preventDefault();
 
-        let numberInCart = document.querySelector("#number-in-cart");
-        console.log(numberInCart.textContent);
+        // let numberInCart = document.querySelector("#number-in-cart");
+        // console.log(numberInCart.textContent);
 
-        let numberToAdd = document.querySelector("#cart-amount").value;
+        // let numberToAdd = document.querySelector("#cart-amount").value;
 
-        function addToCart (num1, num2) {
-            return num1 + num2;
-        };
+        // function addToCart (num1, num2) {
+        //     return num1 + num2;
+        // };
 
-        numberInCart.textContent = addToCart(Number(numberInCart.textContent), Number(numberToAdd));
+        // numberInCart.textContent = addToCart(parseInt(numberInCart.textContent), parseInt(numberToAdd));
 
+        const numberToAdd = parseInt(document.querySelector("#cart-amount").value);
+        const numberInCart = parseInt(document.querySelector("#number-in-cart").textContent);
         
-        
+        const newNumberInCart = numberInCart + numberToAdd;
+        selectedItem.number_in_bag = newNumberInCart;
+        document.querySelector("#number-in-cart").textContent = newNumberInCart;
+
+        fetch(`http://localhost:3000/menu/${selectedItem.id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                "number_in_bag": newNumberInCart
+            })
+        })
+        .then(response => response.json())
+        .then(item => {
+            displayDetails(item);
+
+        });
+
+        form.reset();
+
         // numberOfItems = cartAmountValue.value;
         // numberInCart.textContent = numberOfItems;
     });
+
+    // const totalCostDiv = document.createElement("div");
+    // totalCostDiv = 
+
 })
 
+// Calculate the *total cost* of what is currently in the cart and display it somewhere on the page.
+// When items are added to the cart, we will calculate the cost * the selected item's price.
+// We will create a variable to keep track of total cost.
+// This variable will be displayed next to number in cart.
 
-
-
+// Create element to display cost
 
 
 
